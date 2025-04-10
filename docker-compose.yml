@@ -1,0 +1,12 @@
+services:
+  swift-mongo:
+    image: mongo:latest
+    container_name: swift-mongo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - swift-data:/data/db
+
+volumes:
+  swift-data:
