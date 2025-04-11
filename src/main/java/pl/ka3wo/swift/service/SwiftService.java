@@ -1,17 +1,13 @@
 package pl.ka3wo.swift.service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import pl.ka3wo.swift.exception.DuplicateSwiftCodeException;
 import pl.ka3wo.swift.exception.NoSwiftDataFound;
 import pl.ka3wo.swift.model.SwiftData;
 import pl.ka3wo.swift.model.dto.ApiResponse;
+import pl.ka3wo.swift.model.dto.SwiftDataBranchDto;
 import pl.ka3wo.swift.model.dto.SwiftDataCountryDto;
 import pl.ka3wo.swift.model.dto.SwiftDataDto;
 import pl.ka3wo.swift.model.dto.SwiftDataRequest;
@@ -20,45 +16,38 @@ import pl.ka3wo.swift.repoistory.SwiftRepository;
 @Service
 public class SwiftService {
   private final SwiftRepository swiftRepository;
-  private final MongoTemplate mongoTemplate;
 
-  public SwiftService(SwiftRepository swiftRepository, MongoTemplate mongoTemplate) {
+  public SwiftService(SwiftRepository swiftRepository) {
     this.swiftRepository = swiftRepository;
-    this.mongoTemplate = mongoTemplate;
+  }
+
+  public List<SwiftDataDto> getAll() {
+    return swiftRepository.findAll().stream().map(this::toDto).toList();
   }
 
   public SwiftDataDto getBySwiftCode(String swiftCode) {
-    Query query = new Query();
-    query.addCriteria(Criteria.where("swiftCode").is(swiftCode));
-
-    SwiftData swiftData = mongoTemplate.findOne(query, SwiftData.class);
-
-    if (swiftData == null) {
-      throw new NoSwiftDataFound("SWIFT data not found");
-    }
+    SwiftData swiftData =
+        swiftRepository
+            .findBySwiftCode(swiftCode)
+            .orElseThrow(() -> new NoSwiftDataFound("SWIFT data not found"));
     return toDto(swiftData);
   }
 
   public SwiftDataCountryDto getByCountryISO2code(String countryISO2code) {
-    Query query = new Query();
-    query.addCriteria(Criteria.where("countryISO2").is(countryISO2code));
+    List<SwiftData> swiftDataList = swiftRepository.findByCountryISO2(countryISO2code);
 
-    List<SwiftData> swiftData = mongoTemplate.find(query, SwiftData.class);
-
-    if(swiftData.isEmpty()) {
+    if (swiftDataList.isEmpty()) {
       return new SwiftDataCountryDto(countryISO2code, null, List.of());
     }
 
-    List<SwiftDataDto> swiftDataDtos = swiftData.stream().map(this::toDto).toList();
+    List<SwiftDataDto> swiftDataDtos = swiftDataList.stream().map(this::toDto).toList();
     String countryName = swiftDataDtos.get(0).countryName();
 
     return new SwiftDataCountryDto(countryISO2code, countryName, swiftDataDtos);
   }
 
   public ApiResponse save(SwiftDataRequest swiftData) {
-    Query query = new Query();
-    query.addCriteria(Criteria.where("swiftCode").is(swiftData.swiftCode()));
-    boolean swiftDataExists = mongoTemplate.exists(query, SwiftData.class);
+    boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftData.swiftCode());
 
     if (swiftDataExists) {
       throw new DuplicateSwiftCodeException("Data with provided SWIFT code already exists");
@@ -68,15 +57,38 @@ public class SwiftService {
     return new ApiResponse("Added new SWIFT data");
   }
 
+  public ApiResponse deleteOneBySwiftCode(String swiftCode) {
+    boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftCode);
+
+    if (!swiftDataExists) {
+      throw new NoSwiftDataFound("SWIFT data not found");
+    }
+
+    swiftRepository.deleteBySwiftCode(swiftCode);
+    return new ApiResponse("Deleted SWIFT data for: " + swiftCode);
+  }
+
   private SwiftDataDto toDto(SwiftData swiftData) {
+    List<SwiftDataBranchDto> branchDtos =
+        swiftData.getBranches().stream()
+            .map(
+                branch ->
+                    new SwiftDataBranchDto(
+                        branch.address(),
+                        branch.bankName(),
+                        branch.countryISO2(),
+                        branch.isHeadquarter(),
+                        branch.swiftCode()))
+            .collect(Collectors.toList());
+
     return new SwiftDataDto(
-        swiftData.address(),
-        swiftData.bankName(),
-        swiftData.countryISO2(),
-        swiftData.countryName(),
-        swiftData.isHeadquarter(),
-        swiftData.swiftCode(),
-        swiftData.branches());
+        swiftData.getAddress(),
+        swiftData.getBankName(),
+        swiftData.getCountryISO2(),
+        swiftData.getCountryName(),
+        swiftData.getIsHeadquarter(),
+        swiftData.getSwiftCode(),
+        branchDtos);
   }
 
   private SwiftData toEntity(SwiftDataRequest dataRequest) {
@@ -88,6 +100,6 @@ public class SwiftService {
         dataRequest.countryName(),
         dataRequest.isHeadquarter(),
         dataRequest.swiftCode(),
-        null);
+       null);
   }
 }

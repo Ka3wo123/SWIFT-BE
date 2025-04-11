@@ -1,8 +1,16 @@
 package pl.ka3wo.swift.repoistory;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import pl.ka3wo.swift.model.SwiftData;
 
-import java.util.UUID;
+public interface SwiftRepository extends MongoRepository<SwiftData, String> {
+  void deleteBySwiftCode(String swiftCode);
 
-public interface SwiftRepository extends MongoRepository<SwiftData, UUID> {}
+  Optional<SwiftData> findBySwiftCode(String swiftCode);
+
+  List<SwiftData> findByCountryISO2(String countryISO2code);
+
+  boolean existsBySwiftCode(String swiftCode);
+}

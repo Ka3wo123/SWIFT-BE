@@ -1,17 +1,49 @@
 package pl.ka3wo.swift.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "swift_codes")
-public record SwiftData(
-    @Id String id,
-    @Field("address") String address,
-    @Field("bank_name") String bankName,
-    @Field("country_ISO2") String countryISO2,
-    @Field("country_name") String countryName,
-    @Field("is_headquarter") Boolean isHeadquarter,
-    @Field("swift_code") String swiftCode,
-    List<SwiftDataBranch> branches) {}
+@Document(collection = "swiftCodes")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
+@EqualsAndHashCode
+public class SwiftData {
+  @Id private String id;
+
+  @JsonProperty("ADDRESS")
+  @Field("address")
+  private String address;
+
+  @JsonProperty("NAME")
+  @Field("bankName")
+  private String bankName;
+
+  @JsonProperty("COUNTRY ISO2 CODE")
+  @Field("countryISO2")
+  private String countryISO2;
+
+  @JsonProperty("COUNTRY NAME")
+  @Field("countryName")
+  private String countryName;
+
+  @Field("isHeadquarter")
+  private Boolean isHeadquarter;
+
+  @JsonProperty("SWIFT CODE")
+  @Field("swiftCode")
+  private String swiftCode;
+
+  @DocumentReference(collection = "swiftCodes")
+  @Field("branches")
+  private List<SwiftDataBranch> branches;
+}

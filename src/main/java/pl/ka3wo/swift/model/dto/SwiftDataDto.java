@@ -1,8 +1,9 @@
 package pl.ka3wo.swift.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
-import pl.ka3wo.swift.model.SwiftDataBranch;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record SwiftDataDto(
     String address,
     String bankName,
@@ -10,4 +11,5 @@ public record SwiftDataDto(
     String countryName,
     Boolean isHeadquarter,
     String swiftCode,
-    List<SwiftDataBranch> branches) {}
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    List<SwiftDataBranchDto> branches) {}
