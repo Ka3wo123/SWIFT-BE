@@ -7,6 +7,17 @@ services:
       - "127.0.0.1:27017:27017"
     volumes:
       - swift-data:/data/db
+  swift-app:
+    container_name: swift-app-be
+    build:
+      context: .
+    depends_on:
+      - swift-mongo
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - MONGO_URI=mongodb://swift-mongo:27017/swifts
+
 
 volumes:
   swift-data:

@@ -4,4 +4,4 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/swifts
+      uri: ${MONGO_URI}
