@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import pl.ka3wo.swift.model.SwiftData;
 import pl.ka3wo.swift.model.SwiftDataBranch;
-import pl.ka3wo.swift.repoistory.SwiftRepository;
+import pl.ka3wo.swift.repository.SwiftRepository;
 
 @Service
 public class CSVSwiftLoaderService {
