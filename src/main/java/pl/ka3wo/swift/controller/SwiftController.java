@@ -3,6 +3,7 @@ package pl.ka3wo.swift.controller;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.ka3wo.swift.model.dto.ApiResponse;
@@ -37,8 +38,8 @@ public class SwiftController {
   }
 
   @PostMapping("/")
-  public ResponseEntity<ApiResponse> save(@Valid @RequestBody SwiftDataRequest swiftData) {
-    return ResponseEntity.ok(swiftService.save(swiftData));
+  public ResponseEntity<ApiResponse> create(@Valid @RequestBody SwiftDataRequest swiftData) {
+    return new ResponseEntity<>(swiftService.create(swiftData), HttpStatus.CREATED);
   }
 
   @DeleteMapping("/{swift-code}")

@@ -2,7 +2,6 @@ package pl.ka3wo.swift.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import pl.ka3wo.swift.exception.DuplicateSwiftCodeException;
 import pl.ka3wo.swift.exception.NoSwiftDataFound;
 import pl.ka3wo.swift.model.SwiftData;
@@ -38,14 +37,14 @@ public class SwiftService {
     return swiftRepository
         .findBySwiftCode(swiftCode)
         .map(swiftDataMapper)
-        .orElseThrow(() -> new NoSwiftDataFound("SWIFT data not found"));
+        .orElseThrow(() -> new NoSwiftDataFound(String.format("SWIFT data with SWIFT code %s not found", swiftCode)));
   }
 
   public SwiftDataCountryDto getByCountryISO2code(String countryISO2code) {
     List<SwiftData> swiftDataList = swiftRepository.findByCountryISO2(countryISO2code);
 
     if (swiftDataList.isEmpty()) {
-      return new SwiftDataCountryDto(countryISO2code, null, List.of());
+      throw new NoSwiftDataFound(String.format("SWIFT data with country ISO2 code %s not found", countryISO2code));
     }
 
     List<SwiftDataDto> swiftDataDtos = swiftDataList.stream().map(swiftDataMapper).toList();
@@ -54,11 +53,11 @@ public class SwiftService {
     return new SwiftDataCountryDto(countryISO2code, countryName, swiftDataDtos);
   }
 
-  public ApiResponse save(SwiftDataRequest swiftData) {
+  public ApiResponse create(SwiftDataRequest swiftData) {
     boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftData.swiftCode());
 
     if (swiftDataExists) {
-      throw new DuplicateSwiftCodeException("Data with provided SWIFT code already exists");
+      throw new DuplicateSwiftCodeException(String.format("Data with SWIFT code %s already exists", swiftData.swiftCode()));
     }
 
     SwiftData entity = toEntity(swiftData);

@@ -1,3 +1,3 @@
-package pl.ka3wo.swift.model.dto;
+    package pl.ka3wo.swift.model.dto;
 
-public record ApiResponse(String message) {}
+    public record ApiResponse(String message) {}
