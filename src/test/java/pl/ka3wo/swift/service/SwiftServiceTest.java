@@ -1,4 +1,4 @@
-package pl.ka3wo.swift.unit;
+package pl.ka3wo.swift.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -17,7 +17,6 @@ import pl.ka3wo.swift.model.SwiftData;
 import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 import pl.ka3wo.swift.model.mapper.SwiftDataMapper;
 import pl.ka3wo.swift.repository.SwiftRepository;
-import pl.ka3wo.swift.service.SwiftService;
 
 @ExtendWith(SpringExtension.class)
 public class SwiftServiceTest {

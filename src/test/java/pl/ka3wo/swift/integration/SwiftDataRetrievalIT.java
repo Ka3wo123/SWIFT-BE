@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import pl.ka3wo.swift.integration.base.BaseMongoContainer;
 
-public class SwiftDataRetrievalTest extends BaseMongoContainer {
+public class SwiftDataRetrievalIT extends BaseMongoContainer {
 
   @LocalServerPort private int port;
 

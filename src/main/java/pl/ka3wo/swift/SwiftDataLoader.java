@@ -14,6 +14,6 @@ public class SwiftDataLoader implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    csvSwiftLoaderService.extractAndLoad();
+    csvSwiftLoaderService.loadSwiftDataFromCsv();
   }
 }

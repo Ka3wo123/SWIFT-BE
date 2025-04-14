@@ -13,7 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import pl.ka3wo.swift.integration.base.BaseMongoContainer;
 import pl.ka3wo.swift.repository.SwiftRepository;
 
-public class SwiftDataDeletionTest extends BaseMongoContainer {
+public class SwiftDataDeletionIT extends BaseMongoContainer {
     @LocalServerPort
     private int port;
 

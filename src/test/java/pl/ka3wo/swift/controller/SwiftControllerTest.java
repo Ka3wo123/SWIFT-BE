@@ -1,4 +1,4 @@
-package pl.ka3wo.swift.unit;
+package pl.ka3wo.swift.controller;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.*;
@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import pl.ka3wo.swift.controller.SwiftController;
 import pl.ka3wo.swift.model.dto.ApiResponse;
 import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 import pl.ka3wo.swift.service.SwiftService;
@@ -28,6 +27,8 @@ public class SwiftControllerTest {
   @MockitoBean private SwiftService service;
 
   @Autowired private ObjectMapper objectMapper;
+
+  private SwiftDataRequest swiftDataRequest;
 
   static Stream<String> invalidSwiftCodes() {
     return Stream.of(

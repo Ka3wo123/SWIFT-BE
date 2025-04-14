@@ -23,8 +23,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
     implementation 'org.mapstruct:mapstruct:1.6.3'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     compileOnly 'org.projectlombok:lombok:1.18.36'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.4.4'
@@ -39,6 +39,21 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    outputs.upToDateWhen { false }
+    testLogging {
+        events = ["passed", "skipped", "failed"]
+        exceptionFormat = "full"
+        showStandardStreams = true
+    }
+
+    afterSuite { desc, result ->
+        if (!desc.parent)
+            println("${result.resultType} " +
+                    "(${result.testCount} tests, " +
+                    "${result.successfulTestCount} successes, " +
+                    "${result.failedTestCount} failures, " +
+                    "${result.skippedTestCount} skipped)")
+    }
 }
 
 
@@ -46,10 +61,8 @@ tasks.register('utest', Test) {
     description = 'Runs all unit tests.'
     group = 'verification'
     useJUnitPlatform()
-    include '**/unit/**'
-
+    exclude '**/integration/**'
     outputs.upToDateWhen { false }
-
     testLogging {
         events = ["passed", "skipped", "failed"]
         exceptionFormat = "full"
@@ -61,7 +74,7 @@ tasks.register('itest', Test) {
     description = 'Runs all integration tests.'
     group = 'verification'
     useJUnitPlatform()
-    include '**/integration/**'
+    include '**/integration/*IT.class'
     outputs.upToDateWhen { false }
     testLogging {
         events = ["passed", "skipped", "failed"]

@@ -2,12 +2,18 @@ package pl.ka3wo.swift.integration;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Optional;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import pl.ka3wo.swift.integration.base.BaseMongoContainer;
@@ -16,7 +22,7 @@ import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 import pl.ka3wo.swift.repository.SwiftRepository;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SwiftDataCreationTest extends BaseMongoContainer {
+class SwiftDataCreationIT extends BaseMongoContainer {
   @LocalServerPort private int port;
   @Autowired private SwiftRepository swiftRepository;
   private final String HEADQUARTER_SWIFT_CODE = "HPGWGBWZXXX";
@@ -28,7 +34,7 @@ class SwiftDataCreationTest extends BaseMongoContainer {
 
   @Order(1)
   @Test
-  public void shouldCreateNewHeadquarter() {
+  public void shouldCreateNewHeadquarterAndNotAssignItself() {
     SwiftDataRequest request =
         new SwiftDataRequest(
             "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
@@ -49,6 +55,12 @@ class SwiftDataCreationTest extends BaseMongoContainer {
 
     boolean exists = swiftRepository.existsBySwiftCode(request.swiftCode());
     assertTrue(exists);
+
+    Optional<SwiftData> hq = swiftRepository.findBySwiftCode(HEADQUARTER_SWIFT_CODE);
+    assertTrue(hq.isPresent());
+    boolean isSelfAssigned =
+            hq.get().getBranches().stream().anyMatch(b -> request.swiftCode().equals(b.swiftCode()));
+    assertFalse(isSelfAssigned);
   }
 
   @Order(2)

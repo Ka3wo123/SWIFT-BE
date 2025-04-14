@@ -43,7 +43,7 @@ public class SwiftService {
 
     List<SwiftDataDto> swiftDataDtos =
         swiftDataList.stream().map(swiftDataMapper::toSwiftDataDto).toList();
-    String countryName = swiftDataDtos.get(0).countryName();
+    String countryName = String.valueOf(swiftDataDtos.stream().findFirst());
 
     return new SwiftDataCountryDto(countryISO2code, countryName, swiftDataDtos);
   }
@@ -55,40 +55,15 @@ public class SwiftService {
       throw new DuplicateSwiftCodeException(
           String.format("Data with SWIFT code %s already exists", swiftDataRequest.swiftCode()));
     }
+    String headquarterSuffix = "XXX";
 
     SwiftData entity = swiftDataMapper.fromSwiftDataRequest(swiftDataRequest);
     String prefix = entity.getSwiftCode().substring(0, 8);
 
-    if (entity.getIsHeadquarter()) {
-      List<SwiftDataBranch> branches =
-          swiftRepository.findBySwiftCodeStartingWith(prefix).stream()
-              .filter(sd -> !sd.getSwiftCode().equals(entity.getSwiftCode()))
-              .filter(sd -> !sd.getIsHeadquarter())
-              .map(swiftDataMapper::toSwiftDataBranch)
-              .toList();
-      entity.setBranches(branches);
-      swiftRepository.save(entity);
+    if (Boolean.TRUE.equals(entity.getIsHeadquarter() || entity.getSwiftCode().endsWith(headquarterSuffix))) {
+      createHeadquarter(entity, prefix);
     } else {
-      SwiftData saved = swiftRepository.save(entity);
-      swiftRepository
-          .findBySwiftCode(prefix + "XXX")
-          .ifPresent(
-              hq -> {
-                List<SwiftDataBranch> branches = hq.getBranches();
-
-                SwiftDataBranch swiftDataBranch =
-                    new SwiftDataBranch(
-                        saved.getId(),
-                        saved.getAddress(),
-                        saved.getBankName(),
-                        saved.getCountryISO2(),
-                        false,
-                        saved.getSwiftCode());
-
-                branches.add(swiftDataBranch);
-                hq.setBranches(branches);
-                swiftRepository.save(hq);
-              });
+      createBranch(entity, prefix);
     }
 
     return new ApiResponse("Successfully added new SWIFT data");
@@ -103,5 +78,38 @@ public class SwiftService {
 
     swiftRepository.deleteBySwiftCode(swiftCode);
     return new ApiResponse("Successfully deleted SWIFT data for code: " + swiftCode);
+  }
+
+  private void createHeadquarter(SwiftData entity, String prefix) {
+    List<SwiftDataBranch> branches = swiftRepository.findBySwiftCodeStartingWith(prefix).stream()
+            .filter(sd -> !sd.getSwiftCode().equals(entity.getSwiftCode()))
+            .filter(sd -> !Boolean.TRUE.equals(sd.getIsHeadquarter()))
+            .map(swiftDataMapper::toSwiftDataBranch)
+            .toList();
+
+    entity.setBranches(branches);
+    swiftRepository.save(entity);
+  }
+
+  private void createBranch(SwiftData entity, String prefix) {
+    SwiftData saved = swiftRepository.save(entity);
+
+    swiftRepository.findBySwiftCode(prefix + "XXX")
+            .ifPresent(hq -> {
+              List<SwiftDataBranch> branches = hq.getBranches();
+
+              SwiftDataBranch swiftDataBranch = new SwiftDataBranch(
+                      saved.getId(),
+                      saved.getAddress(),
+                      saved.getBankName(),
+                      saved.getCountryISO2(),
+                      false,
+                      saved.getSwiftCode()
+              );
+
+              branches.add(swiftDataBranch);
+              hq.setBranches(branches);
+              swiftRepository.save(hq);
+            });
   }
 }
