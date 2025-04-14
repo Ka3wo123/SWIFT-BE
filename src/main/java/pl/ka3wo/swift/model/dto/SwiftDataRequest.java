@@ -10,5 +10,5 @@ public record SwiftDataRequest(
     @NotNull @NotBlank String countryISO2,
     @NotNull @NotBlank String countryName,
     @NotNull Boolean isHeadquarter,
-    @NotNull @Pattern(regexp = "^[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(XXX|[A-Z0-9]{3})?$")
+    @NotNull @Pattern(regexp = "^[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(XXX|[A-Z0-9]{3})$")
         String swiftCode) {}

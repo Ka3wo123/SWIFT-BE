@@ -1,28 +1,47 @@
-  package pl.ka3wo.swift.model.mapper;
+package pl.ka3wo.swift.model.mapper;
 
-  import org.springframework.stereotype.Service;
-  import pl.ka3wo.swift.model.SwiftData;
-  import pl.ka3wo.swift.model.dto.SwiftDataDto;
+import com.fasterxml.jackson.annotation.JsonView;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import pl.ka3wo.swift.model.SwiftData;
+import pl.ka3wo.swift.model.SwiftDataBranch;
+import pl.ka3wo.swift.model.dto.SwiftDataDto;
+import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 
-  import java.util.function.Function;
+@Mapper(componentModel = "spring")
+public interface SwiftDataMapper {
+  @Mapping(source = "swiftCode", target = "swiftCode")
+  @Mapping(source = "address", target = "address")
+  @Mapping(source = "bankName", target = "bankName")
+  @Mapping(source = "countryISO2", target = "countryISO2")
+  @Mapping(source = "countryName", target = "countryName")
+  @Mapping(source = "isHeadquarter", target = "isHeadquarter")
+  @Mapping(source = "branches", target = "branches")
+  SwiftDataDto toSwiftDataDto(SwiftData entity);
 
-  @Service
-  public class SwiftDataMapper implements Function<SwiftData, SwiftDataDto> {
-    private final SwiftDataBranchMapper branchMapper;
+  @Mapping(source = "swiftCode", target = "swiftCode")
+  @Mapping(source = "address", target = "address")
+  @Mapping(source = "bankName", target = "bankName")
+  @Mapping(source = "countryISO2", target = "countryISO2")
+  @Mapping(source = "countryName", target = "countryName")
+  @Mapping(source = "isHeadquarter", target = "isHeadquarter")
+  @Mapping(source = "branches", target = "branches")
+  SwiftData toSwiftDataEntity(SwiftDataDto dto);
 
-    public SwiftDataMapper(SwiftDataBranchMapper mapper) {
-      this.branchMapper = mapper;
-    }
+  @Mapping(source = "swiftCode", target = "swiftCode")
+  @Mapping(source = "address", target = "address")
+  @Mapping(source = "bankName", target = "bankName")
+  @Mapping(source = "countryISO2", target = "countryISO2")
+  @Mapping(source = "countryName", target = "countryName")
+  @Mapping(target = "isHeadquarter", expression = "java(request.swiftCode().endsWith(\"XXX\"))")
+  SwiftData fromSwiftDataRequest(SwiftDataRequest request);
 
-    @Override
-    public SwiftDataDto apply(SwiftData swiftData) {
-      return new SwiftDataDto(
-          swiftData.getAddress(),
-          swiftData.getBankName(),
-          swiftData.getCountryISO2(),
-          swiftData.getCountryName(),
-          swiftData.getIsHeadquarter(),
-          swiftData.getSwiftCode(),
-          swiftData.getBranches().stream().map(branchMapper).toList());
-    }
-  }
+  @Mapping(source = "swiftCode", target = "swiftCode")
+  @Mapping(source = "address", target = "address")
+  @Mapping(source = "bankName", target = "bankName")
+  @Mapping(source = "countryISO2", target = "countryISO2")
+  @Mapping(target = "isHeadquarter", constant = "false")
+  SwiftDataBranch toSwiftDataBranch(SwiftData entity);
+
+
+}

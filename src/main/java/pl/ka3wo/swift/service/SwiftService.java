@@ -10,7 +10,6 @@ import pl.ka3wo.swift.model.dto.ApiResponse;
 import pl.ka3wo.swift.model.dto.SwiftDataCountryDto;
 import pl.ka3wo.swift.model.dto.SwiftDataDto;
 import pl.ka3wo.swift.model.dto.SwiftDataRequest;
-import pl.ka3wo.swift.model.mapper.SwiftDataBranchMapper;
 import pl.ka3wo.swift.model.mapper.SwiftDataMapper;
 import pl.ka3wo.swift.repository.SwiftRepository;
 
@@ -18,49 +17,46 @@ import pl.ka3wo.swift.repository.SwiftRepository;
 public class SwiftService {
   private final SwiftRepository swiftRepository;
   private final SwiftDataMapper swiftDataMapper;
-  private final SwiftDataBranchMapper branchMapper;
 
-  public SwiftService(
-      SwiftRepository swiftRepository,
-      SwiftDataMapper swiftDataMapper,
-      SwiftDataBranchMapper branchMapper) {
+  public SwiftService(SwiftRepository swiftRepository, SwiftDataMapper swiftDataMapper) {
     this.swiftRepository = swiftRepository;
     this.swiftDataMapper = swiftDataMapper;
-    this.branchMapper = branchMapper;
-  }
-
-  public List<SwiftDataDto> getAll() {
-    return swiftRepository.findAll().stream().map(swiftDataMapper).toList();
   }
 
   public SwiftDataDto getBySwiftCode(String swiftCode) {
     return swiftRepository
         .findBySwiftCode(swiftCode)
-        .map(swiftDataMapper)
-        .orElseThrow(() -> new NoSwiftDataFound(String.format("SWIFT data with SWIFT code %s not found", swiftCode)));
+        .map(swiftDataMapper::toSwiftDataDto)
+        .orElseThrow(
+            () ->
+                new NoSwiftDataFound(
+                    String.format("SWIFT data with SWIFT code %s not found", swiftCode)));
   }
 
   public SwiftDataCountryDto getByCountryISO2code(String countryISO2code) {
     List<SwiftData> swiftDataList = swiftRepository.findByCountryISO2(countryISO2code);
 
     if (swiftDataList.isEmpty()) {
-      throw new NoSwiftDataFound(String.format("SWIFT data with country ISO2 code %s not found", countryISO2code));
+      throw new NoSwiftDataFound(
+          String.format("SWIFT data with country ISO2 code %s not found", countryISO2code));
     }
 
-    List<SwiftDataDto> swiftDataDtos = swiftDataList.stream().map(swiftDataMapper).toList();
+    List<SwiftDataDto> swiftDataDtos =
+        swiftDataList.stream().map(swiftDataMapper::toSwiftDataDto).toList();
     String countryName = swiftDataDtos.get(0).countryName();
 
     return new SwiftDataCountryDto(countryISO2code, countryName, swiftDataDtos);
   }
 
-  public ApiResponse create(SwiftDataRequest swiftData) {
-    boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftData.swiftCode());
+  public ApiResponse create(SwiftDataRequest swiftDataRequest) {
+    boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftDataRequest.swiftCode());
 
     if (swiftDataExists) {
-      throw new DuplicateSwiftCodeException(String.format("Data with SWIFT code %s already exists", swiftData.swiftCode()));
+      throw new DuplicateSwiftCodeException(
+          String.format("Data with SWIFT code %s already exists", swiftDataRequest.swiftCode()));
     }
 
-    SwiftData entity = toEntity(swiftData);
+    SwiftData entity = swiftDataMapper.fromSwiftDataRequest(swiftDataRequest);
     String prefix = entity.getSwiftCode().substring(0, 8);
 
     if (entity.getIsHeadquarter()) {
@@ -68,15 +64,7 @@ public class SwiftService {
           swiftRepository.findBySwiftCodeStartingWith(prefix).stream()
               .filter(sd -> !sd.getSwiftCode().equals(entity.getSwiftCode()))
               .filter(sd -> !sd.getIsHeadquarter())
-              .map(
-                  sd ->
-                      new SwiftDataBranch(
-                          sd.getId(),
-                          sd.getAddress(),
-                          sd.getBankName(),
-                          sd.getCountryISO2(),
-                          false,
-                          sd.getSwiftCode()))
+              .map(swiftDataMapper::toSwiftDataBranch)
               .toList();
       entity.setBranches(branches);
       swiftRepository.save(entity);
@@ -110,23 +98,10 @@ public class SwiftService {
     boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftCode);
 
     if (!swiftDataExists) {
-      throw new NoSwiftDataFound("SWIFT data not found");
+      throw new NoSwiftDataFound(String.format("SWIFT data with SWIFT code %s not found", swiftCode));
     }
 
     swiftRepository.deleteBySwiftCode(swiftCode);
     return new ApiResponse("Successfully deleted SWIFT data for code: " + swiftCode);
-  }
-
-  private SwiftData toEntity(SwiftDataRequest dataRequest) {
-    boolean isHeadquarter = dataRequest.swiftCode().endsWith("XXX");
-    return new SwiftData(
-        null,
-        dataRequest.address(),
-        dataRequest.bankName(),
-        dataRequest.countryISO2(),
-        dataRequest.countryName(),
-        isHeadquarter,
-        dataRequest.swiftCode(),
-        null);
   }
 }

@@ -1,6 +1,5 @@
 package pl.ka3wo.swift.controller;
 
-import java.util.List;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,11 +18,6 @@ public class SwiftController {
 
   public SwiftController(SwiftService swiftService) {
     this.swiftService = swiftService;
-  }
-
-  @GetMapping("/")
-  public ResponseEntity<List<SwiftDataDto>> getAll() {
-    return ResponseEntity.ok(swiftService.getAll());
   }
 
   @GetMapping("/{swift-code}")

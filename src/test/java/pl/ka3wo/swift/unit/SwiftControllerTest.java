@@ -22,7 +22,7 @@ import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 import pl.ka3wo.swift.service.SwiftService;
 
 @WebMvcTest(SwiftController.class)
-public class UnitTest {
+public class SwiftControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private SwiftService service;
@@ -45,24 +45,75 @@ public class UnitTest {
   static Stream<Arguments> invalidRequests() {
     return Stream.of(
         Arguments.of(
-            new SwiftDataRequest(null, "bank", "PL", "Poland", false, "ABCDEF12"), "address"),
+            new SwiftDataRequest(
+                null, "GRINGOTTS WIZARDING BANK", "GB", "GREAT BRITAIN", true, "HPGWGBWZXXX"),
+            "address"),
         Arguments.of(
-            new SwiftDataRequest("addr", null, "PL", "Poland", false, "ABCDEF12"), "bankName"),
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                null,
+                "GB",
+                "GREAT BRITAIN",
+                false,
+                "HPGWGBWZXXX"),
+            "bankName"),
         Arguments.of(
-            new SwiftDataRequest("addr", "", "PL", "Poland", false, "ABCDEF12"), "bankName"),
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                "",
+                "GB",
+                "GREAT BRITAIN",
+                false,
+                "HPGWGBWZXXX"),
+            "bankName"),
         Arguments.of(
-            new SwiftDataRequest("addr", "bank", null, "Poland", false, "ABCDEF12"), "countryISO2"),
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                "GRINGOTTS WIZARDING BANK",
+                null,
+                "GREAT BRITAIN",
+                false,
+                "HPGWGBWZXXX"),
+            "countryISO2"),
         Arguments.of(
-            new SwiftDataRequest("addr", "bank", "", "Poland", false, "ABCDEF12"), "countryISO2"),
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                "GRINGOTTS WIZARDING BANK",
+                "",
+                "GREAT BRITAIN",
+                false,
+                "HPGWGBWZXXX"),
+            "countryISO2"),
         Arguments.of(
-            new SwiftDataRequest("addr", "bank", "PL", null, false, "ABCDEF12"), "countryName"),
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                "GRINGOTTS WIZARDING BANK",
+                "GB",
+                null,
+                false,
+                "HPGWGBWZXXX"),
+            "countryName"),
         Arguments.of(
-            new SwiftDataRequest("addr", "bank", "PL", "", false, "ABCDEF12"), "countryName"));
+            new SwiftDataRequest(
+                "DIAGON ALLEY, CHARING CROSS ROAD, LONDON, ENGLAND, GB",
+                "GRINGOTTS WIZARDING BANK",
+                "GB",
+                "",
+                false,
+                "HPGWGBWZXXX"),
+            "countryName"));
   }
 
   @ParameterizedTest
   @ValueSource(
-      strings = {"AAAABBCC", "1234AA12", "AB12AA1B", "ABCDAABB123", "ABCDAABBAAA", "ABCDAABBXXX"})
+      strings = {
+        "AAAABBCCAAA",
+        "1234AA12AAA",
+        "AB12AA1BAAA",
+        "ABCDAABB123",
+        "ABCDAABBAAA",
+        "ABCDAABBXXX"
+      })
   void shouldCreateValidSwiftData(String swiftCode) throws Exception {
     SwiftDataRequest request = new SwiftDataRequest("x", "x", "x", "x", false, swiftCode);
 
@@ -74,6 +125,7 @@ public class UnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message", is("Successfully added new SWIFT data")));
   }
 
@@ -90,10 +142,12 @@ public class UnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.title", is("Invalid SWIFT data")))
-        .andExpect(jsonPath("$.errors.swiftCode").exists())
-        .andExpect(jsonPath("$.errors.swiftCode.message", not(emptyOrNullString())))
-        .andExpect(jsonPath("$.errors.swiftCode.rejectedValue", is(swiftCode)));
+        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpectAll(
+            jsonPath("$.title", is("Invalid SWIFT data")),
+            jsonPath("$.errors.swiftCode").exists(),
+            jsonPath("$.errors.swiftCode.message", not(emptyOrNullString())),
+            jsonPath("$.errors.swiftCode.rejectedValue", is(swiftCode)));
   }
 
   @ParameterizedTest
@@ -109,8 +163,10 @@ public class UnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.title", is("Invalid SWIFT data")))
-        .andExpect(jsonPath("$.errors." + field).exists())
-        .andExpect(jsonPath("$.errors." + field + ".message", not(emptyOrNullString())));
+        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpectAll(
+            jsonPath("$.title", is("Invalid SWIFT data")),
+            jsonPath("$.errors." + field).exists(),
+            jsonPath("$.errors." + field + ".message", not(emptyOrNullString())));
   }
 }
