@@ -6,8 +6,12 @@ This is REST API for handling Bank Identifier Codes (BIC) or SWIFT codes. It all
 
 - [Stack](#stack)
 - [Launching](#launching)
+  - [Localhost machine](#localhost-machine)
+  - [Docker containers](#docker-containers)
 - [API Endpoints](#api-endpoints)
 - [Testing](#testing)
+  - [Unit tests](#unit-tests)
+  - [Integration tests](#integration-tests)
 
 ## Stack
 
@@ -23,7 +27,7 @@ This is REST API for handling Bank Identifier Codes (BIC) or SWIFT codes. It all
   <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678077-computer-512.png" alt="Docker Logo" width="80"/>
 </p>
 
-Launching on localhost machine:
+### Localhost machine:
 
 1. Clone repository `git clone https://github.com/Ka3wo123/SWIFT-BE.git`
 2. Launch Mongo database in Docker container with one of the below manners or set up on your local machine:
@@ -37,7 +41,9 @@ Launching on localhost machine:
   <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-512.png" alt="Docker Logo" width="100"/>
 </p>
 
-Launching in containers requires just `docker compose up -d` in root dir.
+### Docker containers
+
+Run `docker compose up -d` in root dir.
 
 ## API endpoints
 
@@ -50,6 +56,11 @@ Launching in containers requires just `docker compose up -d` in root dir.
 
 ## Testing
 
+Commands to run tests:
+- `./gradlew utest` - all unit tests
+- `./gradlew itest` - all integration tests
+- `./gradlew test` - all unit + integration tests
+
 ### Unit tests
 
 Unit tests covers:
@@ -59,6 +70,7 @@ Unit tests covers:
   - [SwiftServiceTest](./src/test/java/pl/ka3wo/swift/service/SwiftServiceTest.java)
 - controller layer
   - [SwiftControllerTest](./src/test/java/pl/ka3wo/swift/controller/SwiftControllerTest.java)
+
 
 ### Integration tests
 
