@@ -36,49 +36,40 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 }
 
-
-test {
-    useJUnitPlatform()
-    outputs.upToDateWhen { false }
-    testLogging {
+def testSummary = { Test testTask ->
+    testTask.useJUnitPlatform()
+    testTask.outputs.upToDateWhen { false }
+    testTask.testLogging {
         events = ["passed", "skipped", "failed"]
         exceptionFormat = "full"
         showStandardStreams = true
     }
-
-    afterSuite { desc, result ->
-        if (!desc.parent)
-            println("${result.resultType} " +
+    testTask.afterSuite { desc, result ->
+        if (!desc.parent) {
+            println("Summary: ${result.resultType} " +
                     "(${result.testCount} tests, " +
                     "${result.successfulTestCount} successes, " +
                     "${result.failedTestCount} failures, " +
                     "${result.skippedTestCount} skipped)")
+        }
     }
 }
 
+test {
+    testSummary(delegate)
+}
 
 tasks.register('utest', Test) {
     description = 'Runs all unit tests.'
     group = 'verification'
-    useJUnitPlatform()
     exclude '**/integration/**'
-    outputs.upToDateWhen { false }
-    testLogging {
-        events = ["passed", "skipped", "failed"]
-        exceptionFormat = "full"
-        showStandardStreams = true
-    }
+    testSummary(delegate)
 }
 
 tasks.register('itest', Test) {
     description = 'Runs all integration tests.'
     group = 'verification'
-    useJUnitPlatform()
     include '**/integration/*IT.class'
-    outputs.upToDateWhen { false }
-    testLogging {
-        events = ["passed", "skipped", "failed"]
-        exceptionFormat = "full"
-        showStandardStreams = true
-    }
+    testSummary(delegate)
 }
+

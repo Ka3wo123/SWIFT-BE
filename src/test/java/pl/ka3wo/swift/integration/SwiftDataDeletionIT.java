@@ -26,16 +26,33 @@ public class SwiftDataDeletionIT extends BaseMongoContainer {
 
     @Test
     public void shouldDeleteOneAndReturnConfirmationMessage() {
-        String swiftCode = "AAISALTRXXX";
+        String swiftCode = "AAAAGBCV123";
         given()
                 .accept(ContentType.JSON)
                 .when()
                 .delete("/v1/swift-codes/{swiftCode}", swiftCode)
                 .then()
                 .statusCode(200)
-                .body("message", equalTo("Successfully deleted SWIFT data for code: " + swiftCode));
+                .body("message", equalTo("Successfully deleted SWIFT data"));
         boolean exists = swiftRepository.existsBySwiftCode(swiftCode);
         assertFalse(exists);
+    }
+
+    @Test
+    public void shouldDeleteHeadquarterAndNotDeleteAssociatedBranches() {
+        String swiftCode = "AAAAGBCVXXX";
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .delete("/v1/swift-codes/{swiftCode}", swiftCode)
+                .then()
+                .statusCode(200)
+                .body("message", equalTo("Successfully deleted SWIFT data"));
+        boolean exists = swiftRepository.existsBySwiftCode(swiftCode);
+        assertFalse(exists);
+
+        exists = swiftRepository.existsBySwiftCode("AAAAGBCVAAA");
+        assertTrue(exists);
     }
 
     @Test

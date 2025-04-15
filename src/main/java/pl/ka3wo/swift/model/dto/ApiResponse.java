@@ -1,3 +1,10 @@
-    package pl.ka3wo.swift.model.dto;
+package pl.ka3wo.swift.model.dto;
 
-    public record ApiResponse(String message) {}
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public class ApiResponse {
+  private String message;
+}

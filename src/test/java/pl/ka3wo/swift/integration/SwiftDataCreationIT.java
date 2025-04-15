@@ -59,7 +59,7 @@ class SwiftDataCreationIT extends BaseMongoContainer {
     Optional<SwiftData> hq = swiftRepository.findBySwiftCode(HEADQUARTER_SWIFT_CODE);
     assertTrue(hq.isPresent());
     boolean isSelfAssigned =
-            hq.get().getBranches().stream().anyMatch(b -> request.swiftCode().equals(b.swiftCode()));
+        hq.get().getBranches().stream().anyMatch(b -> request.swiftCode().equals(b.swiftCode()));
     assertFalse(isSelfAssigned);
   }
 

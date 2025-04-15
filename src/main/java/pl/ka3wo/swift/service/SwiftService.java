@@ -6,10 +6,7 @@ import pl.ka3wo.swift.exception.DuplicateSwiftCodeException;
 import pl.ka3wo.swift.exception.NoSwiftDataFound;
 import pl.ka3wo.swift.model.SwiftData;
 import pl.ka3wo.swift.model.SwiftDataBranch;
-import pl.ka3wo.swift.model.dto.ApiResponse;
-import pl.ka3wo.swift.model.dto.SwiftDataCountryDto;
-import pl.ka3wo.swift.model.dto.SwiftDataDto;
-import pl.ka3wo.swift.model.dto.SwiftDataRequest;
+import pl.ka3wo.swift.model.dto.*;
 import pl.ka3wo.swift.model.mapper.SwiftDataMapper;
 import pl.ka3wo.swift.repository.SwiftRepository;
 
@@ -66,7 +63,7 @@ public class SwiftService {
       createBranch(entity, prefix);
     }
 
-    return new ApiResponse("Successfully added new SWIFT data");
+    return new CreateSwiftDataResponse();
   }
 
   public ApiResponse deleteOneBySwiftCode(String swiftCode) {
@@ -77,7 +74,7 @@ public class SwiftService {
     }
 
     swiftRepository.deleteBySwiftCode(swiftCode);
-    return new ApiResponse("Successfully deleted SWIFT data for code: " + swiftCode);
+    return new DeleteSwiftDataResponse();
   }
 
   private void createHeadquarter(SwiftData entity, String prefix) {

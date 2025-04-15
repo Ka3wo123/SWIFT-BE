@@ -3,40 +3,27 @@ package pl.ka3wo.swift.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.Arrays;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
+import pl.ka3wo.swift.exception.DuplicateSwiftCodeException;
 import pl.ka3wo.swift.exception.NoSwiftDataFound;
 import pl.ka3wo.swift.model.SwiftData;
 import pl.ka3wo.swift.model.dto.SwiftDataRequest;
 import pl.ka3wo.swift.model.mapper.SwiftDataMapper;
 import pl.ka3wo.swift.repository.SwiftRepository;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class SwiftServiceTest {
   @Mock private SwiftRepository repository;
   @Mock private SwiftDataMapper mapper;
 
   @InjectMocks private SwiftService service;
-  private List<SwiftData> mockData;
-
-  @BeforeEach
-  public void setUp() {
-    SwiftData data1 =
-        new SwiftData(
-            "1", "address", "bankName", "countryISO2", "countryName", false, "AAAABBCC", null);
-    SwiftData data2 =
-        new SwiftData(
-            "1", "address", "bankName", "countryISO2", "countryName", false, "BBBBCC11", null);
-    mockData = Arrays.asList(data1, data2);
-  }
-
+  private static final String SWIFT_CODE = "AAAABBCC";
+  
   @Test
   public void shouldThrowNotFound() {
     String swiftCode = "XXXXXXXX";
@@ -45,11 +32,11 @@ public class SwiftServiceTest {
 
     Exception exception =
         assertThrows(NoSwiftDataFound.class, () -> service.getBySwiftCode(swiftCode));
-    assertTrue(exception.getMessage().contains("SWIFT data not found"));
+    assertEquals("SWIFT data not found", exception.getMessage());
   }
 
   @Test
-  public void shouldCreate() {
+  public void shouldCreateNewSwiftData() {
     SwiftDataRequest request =
         new SwiftDataRequest(
             "31 AVENUE DE LA COSTA  MONACO, MONACO, 98000",
@@ -68,7 +55,7 @@ public class SwiftServiceTest {
             true,
             "BARCMCMXXXX",
             null);
-    
+
     when(mapper.fromSwiftDataRequest(request)).thenReturn(mappedEntity);
 
     service.create(request);
@@ -80,5 +67,49 @@ public class SwiftServiceTest {
     assertNotNull(value);
     assertNotNull(value.getId());
     assertEquals("BARCMCMXXXX", value.getSwiftCode());
+  }
+
+  @Test
+  public void shouldThrowConflictException() {
+    SwiftDataRequest request =
+        new SwiftDataRequest(
+            "31 AVENUE DE LA COSTA  MONACO, MONACO, 98000",
+            "BARCLAYS BANK PLC MONACO",
+            "MC",
+            "MONACO",
+            true,
+            SWIFT_CODE);
+
+    when(mapper.fromSwiftDataRequest(request))
+        .thenThrow(
+            new DuplicateSwiftCodeException(
+                String.format("Data with SWIFT code %s already exists", SWIFT_CODE)));
+
+    Exception exception =
+        assertThrows(DuplicateSwiftCodeException.class, () -> service.create(request));
+    assertEquals(
+        String.format("Data with SWIFT code %s already exists", SWIFT_CODE),
+        exception.getMessage());
+  }
+
+  @Test
+  public void shouldDeleteSwiftDataSuccessfully() {
+    when(repository.existsBySwiftCode(SWIFT_CODE)).thenReturn(true);
+    var response = service.deleteOneBySwiftCode(SWIFT_CODE);
+
+    verify(repository, times(1)).deleteBySwiftCode(SWIFT_CODE);
+    assertNotNull(response);
+    assertEquals("Successfully deleted SWIFT data", response.getMessage());
+  }
+
+  @Test
+  public void shouldThrowNotFoundWhenDeletingNonExistingSwiftData() {
+    String swiftCode = "NONEXIST";
+
+    Exception exception =
+        assertThrows(NoSwiftDataFound.class, () -> service.deleteOneBySwiftCode(swiftCode));
+    assertEquals(
+        String.format("SWIFT data with SWIFT code %s not found", swiftCode),
+        exception.getMessage());
   }
 }

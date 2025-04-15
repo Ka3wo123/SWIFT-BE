@@ -21,7 +21,7 @@ public class SwiftDataRetrievalIT extends BaseMongoContainer {
 
   @Test
   public void shouldGetOneBySwiftCode() {
-    String swiftCode = "BGUSBGSFXXX";
+    String swiftCode = "AAAAGBCVAAA";
     given()
         .when()
         .get("/v1/swift-codes/{swiftCode}", swiftCode)
@@ -34,12 +34,12 @@ public class SwiftDataRetrievalIT extends BaseMongoContainer {
         .body("countryName", notNullValue(String.class))
         .body("isHeadquarter", notNullValue(Boolean.class))
         .body("swiftCode", equalTo(swiftCode))
-        .body("branches", anyOf(is(emptyArray()), is(not(emptyArray())), is(nullValue())));
+        .body("branches", is(not(emptyArray())));
   }
 
   @Test
   public void shouldReturnByCountryISO2Code() {
-    String countryISO2code = "CL";
+    String countryISO2code = "GB";
     given()
         .when()
         .get("/v1/swift-codes/country/{countryISO2code}", countryISO2code)
