@@ -47,12 +47,65 @@ Run `docker compose up -d` in root dir.
 
 ## API endpoints
 
-| Method | Endpoint                              | Description                           | Exception                                                                                                                                                                                                           | Response                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| GET    | /v1/swift-codes/{swiftCode}           | Get SWIFT data by specific SWIFT code | [NoSwiftDataFoundException](./src/main/java/pl/ka3wo/swift/exception/NoSwiftDataFound.java)                                                                                                                         | Status: `200 OK` <br> JSON: [SwiftDataDto](./src/main/java/pl/ka3wo/swift/model/dto/SwiftDataDto.java)                       |
-| GET    | /v1/swift-codes/country/{countryISO2} | Get SWIFT data by country ISO2 code   | [NoSwiftDataFoundException](./src/main/java/pl/ka3wo/swift/exception/NoSwiftDataFound.java)                                                                                                                         | Status: `200 OK` <br> JSON: [SwiftDataCountryDto](./src/main/java/pl/ka3wo/swift/model/dto/SwiftDataCountryDto.java)         |
-| POST   | /v1/swift-codes                       | Create a new SWIFT code entry         | [DuplicateSwiftCodeException](./src/main/java/pl/ka3wo/swift/exception/DuplicateSwiftCodeException.java) <br> [MethodArgumentNotValidException](./src/main/java/pl/ka3wo/swift/exception/RestExceptionHandler.java) | Status: `201 OK` <br> JSON: [CreateSwiftDataResponse](./src/main/java/pl/ka3wo/swift/model/dto/CreateSwiftDataResponse.java) |
-| DELETE | /v1/swift-codes/{swiftCode}           | Delete a SWIFT code by its identifier | [NoSwiftDataFoundException](./src/main/java/pl/ka3wo/swift/model/dto/CreateSwiftDataResponse.java)                                                                                                                  | Status: `200 OK` <br> JSON: [DeleteSwiftDataResponse](./src/main/java/pl/ka3wo/swift/model/dto/DeleteSwiftDataResponse.java) |
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Endpoint</th>
+      <th>Description</th>
+      <th>Exception</th>
+      <th>Response</th>
+      <th>Body</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>/v1/swift-codes/{swiftCode}</td>
+      <td>Get SWIFT data by specific SWIFT code</td>
+      <td><a href="./src/main/java/pl/ka3wo/swift/exception/NoSwiftDataFound.java">NoSwiftDataFoundException</a></td>
+      <td>Status: <code>200 OK</code><br>JSON: <a href="./src/main/java/pl/ka3wo/swift/model/dto/SwiftDataDto.java">SwiftDataDto</a></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/v1/swift-codes/country/{countryISO2}</td>
+      <td>Get SWIFT data by country ISO2 code</td>
+      <td><a href="./src/main/java/pl/ka3wo/swift/exception/NoSwiftDataFound.java">NoSwiftDataFoundException</a></td>
+      <td>Status: <code>200 OK</code><br>JSON: <a href="./src/main/java/pl/ka3wo/swift/model/dto/SwiftDataCountryDto.java">SwiftDataCountryDto</a></td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>/v1/swift-codes</td>
+      <td>Create a new SWIFT data</td>
+      <td>
+        <a href="./src/main/java/pl/ka3wo/swift/exception/DuplicateSwiftCodeException.java">DuplicateSwiftCodeException</a><br>
+        <a href="./src/main/java/pl/ka3wo/swift/exception/RestExceptionHandler.java">MethodArgumentNotValidException</a>
+      </td>
+      <td>Status: <code>201 OK</code><br>JSON: <a href="./src/main/java/pl/ka3wo/swift/model/dto/CreateSwiftDataResponse.java">CreateSwiftDataResponse</a></td>
+      <td>
+        <pre><code>{
+  "address": string,
+  "bankName": string,
+  "countryISO2": string,
+  "countryName": string,
+  "isHeadquarter": boolean,
+  "swiftCode": string  
+}</code></pre>
+      </td>
+    </tr>
+    <tr>
+      <td>DELETE</td>
+      <td>/v1/swift-codes/{swiftCode}</td>
+      <td>Delete a SWIFT data by SWIFT code</td>
+      <td><a href="./src/main/java/pl/ka3wo/swift/exception/NoSwiftDataFound.java">NoSwiftDataFoundException</a></td>
+      <td>Status: <code>200 OK</code><br>JSON: <a href="./src/main/java/pl/ka3wo/swift/model/dto/DeleteSwiftDataResponse.java">DeleteSwiftDataResponse</a></td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
 
 ## Testing
 
