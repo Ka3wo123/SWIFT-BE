@@ -73,17 +73,21 @@ test {
     testSummary(delegate)
 }
 
-tasks.register('utest', Test) {
+tasks.register('utest', Test.class) {
     description = 'Runs all unit tests.'
     group = 'verification'
-    exclude '**/integration/**'
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = testing.suites.test.sources.runtimeClasspath
+    exclude('**/integration/**')
     testSummary(delegate)
 }
 
-tasks.register('itest', Test) {
+tasks.register('itest', Test.class) {
     description = 'Runs all integration tests.'
     group = 'verification'
-    include '**/integration/*IT.class'
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = testing.suites.test.sources.runtimeClasspath
+    include('**/integration/*IT.class')
     testSummary(delegate)
 }
 
