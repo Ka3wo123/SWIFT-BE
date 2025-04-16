@@ -1,6 +1,8 @@
 package pl.ka3wo.swift.service;
 
 import java.util.List;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 import pl.ka3wo.swift.exception.DuplicateSwiftCodeException;
 import pl.ka3wo.swift.exception.NoSwiftDataFound;
@@ -57,7 +59,8 @@ public class SwiftService {
     SwiftData entity = swiftDataMapper.fromSwiftDataRequest(swiftDataRequest);
     String prefix = entity.getSwiftCode().substring(0, 8);
 
-    if (Boolean.TRUE.equals(entity.getIsHeadquarter() || entity.getSwiftCode().endsWith(headquarterSuffix))) {
+    if (Boolean.TRUE.equals(
+        entity.getIsHeadquarter() || entity.getSwiftCode().endsWith(headquarterSuffix))) {
       createHeadquarter(entity, prefix);
     } else {
       createBranch(entity, prefix);
@@ -70,7 +73,8 @@ public class SwiftService {
     boolean swiftDataExists = swiftRepository.existsBySwiftCode(swiftCode);
 
     if (!swiftDataExists) {
-      throw new NoSwiftDataFound(String.format("SWIFT data with SWIFT code %s not found", swiftCode));
+      throw new NoSwiftDataFound(
+          String.format("SWIFT data with SWIFT code %s not found", swiftCode));
     }
 
     swiftRepository.deleteBySwiftCode(swiftCode);
@@ -78,35 +82,48 @@ public class SwiftService {
   }
 
   private void createHeadquarter(SwiftData entity, String prefix) {
-    List<SwiftDataBranch> branches = swiftRepository.findBySwiftCodeStartingWith(prefix).stream()
+    List<SwiftDataBranch> branches =
+        swiftRepository.findBySwiftCodeStartingWith(prefix).stream()
             .filter(sd -> !sd.getSwiftCode().equals(entity.getSwiftCode()))
             .filter(sd -> !Boolean.TRUE.equals(sd.getIsHeadquarter()))
             .map(swiftDataMapper::toSwiftDataBranch)
             .toList();
 
     entity.setBranches(branches);
+    entityToUpperCase(entity);
     swiftRepository.save(entity);
   }
 
   private void createBranch(SwiftData entity, String prefix) {
+    entityToUpperCase(entity);
     SwiftData saved = swiftRepository.save(entity);
 
-    swiftRepository.findBySwiftCode(prefix + "XXX")
-            .ifPresent(hq -> {
+    swiftRepository
+        .findBySwiftCode(prefix + "XXX")
+        .ifPresent(
+            hq -> {
               List<SwiftDataBranch> branches = hq.getBranches();
 
-              SwiftDataBranch swiftDataBranch = new SwiftDataBranch(
+              SwiftDataBranch swiftDataBranch =
+                  new SwiftDataBranch(
                       saved.getId(),
-                      saved.getAddress(),
-                      saved.getBankName(),
-                      saved.getCountryISO2(),
+                      saved.getAddress().toUpperCase(),
+                      saved.getBankName().toUpperCase(),
+                      saved.getCountryISO2().toUpperCase(),
                       false,
-                      saved.getSwiftCode()
-              );
+                      saved.getSwiftCode().toUpperCase());
 
               branches.add(swiftDataBranch);
               hq.setBranches(branches);
               swiftRepository.save(hq);
             });
+  }
+
+  private void entityToUpperCase(SwiftData entity) {
+    entity.setAddress(entity.getAddress().toUpperCase());
+    entity.setSwiftCode(entity.getSwiftCode().toUpperCase());
+    entity.setBankName(entity.getBankName().toUpperCase());
+    entity.setCountryISO2(entity.getCountryISO2().toUpperCase());
+    entity.setCountryName(entity.getCountryName().toUpperCase());
   }
 }

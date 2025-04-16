@@ -38,23 +38,24 @@ public class SwiftServiceTest {
   @Test
   public void shouldCreateNewSwiftData() {
     SwiftDataRequest request =
-        new SwiftDataRequest(
-            "31 AVENUE DE LA COSTA  MONACO, MONACO, 98000",
-            "BARCLAYS BANK PLC MONACO",
-            "MC",
-            "MONACO",
-            true,
-            "BARCMCMXXXX");
+            new SwiftDataRequest(
+                    "31 avenue de la costa  monaco, monaco, 98000",
+                    "barclays bank plc monaco",
+                    "mc",
+                    "monaco",
+                    true,
+                    "BARCMCMXXX");
+
     SwiftData mappedEntity =
-        new SwiftData(
-            "67fbed254ba4a67c9b44a39a",
-            "31 AVENUE DE LA COSTA  MONACO, MONACO, 98000",
-            "BARCLAYS BANK PLC MONACO",
-            "MC",
-            "MONACO",
-            true,
-            "BARCMCMXXXX",
-            null);
+            new SwiftData(
+                    "67fbed254ba4a67c9b44a39a",
+                    "31 avenue de la costa  monaco, monaco, 98000",
+                    "barclays bank plc monaco",
+                    "mc",
+                    "monaco",
+                    true,
+                    "BARCMCMXXX",
+                    null);
 
     when(mapper.fromSwiftDataRequest(request)).thenReturn(mappedEntity);
 
@@ -66,7 +67,11 @@ public class SwiftServiceTest {
     SwiftData value = captor.getValue();
     assertNotNull(value);
     assertNotNull(value.getId());
-    assertEquals("BARCMCMXXXX", value.getSwiftCode());
+    assertEquals(value.getAddress(), value.getAddress().toUpperCase());
+    assertEquals(value.getBankName(), value.getBankName().toUpperCase());
+    assertEquals(value.getCountryISO2(), value.getCountryISO2().toUpperCase());
+    assertEquals(value.getCountryName(), value.getCountryName().toUpperCase());
+    assertEquals("BARCMCMXXX", value.getSwiftCode());
   }
 
   @Test

@@ -40,17 +40,31 @@ def testSummary = { Test testTask ->
     testTask.useJUnitPlatform()
     testTask.outputs.upToDateWhen { false }
     testTask.testLogging {
-        events = ["passed", "skipped", "failed"]
-        exceptionFormat = "full"
-        showStandardStreams = true
+        events = ["failed", "passed", "skipped"]
     }
+
+    def failedTests = []
+
+    testTask.afterTest { desc, result ->
+        if (result.failedTestCount > 0) {
+            failedTests << "${desc.className} > ${desc.name}"
+        }
+    }
+
     testTask.afterSuite { desc, result ->
         if (!desc.parent) {
-            println("Summary: ${result.resultType} " +
-                    "(${result.testCount} tests, " +
-                    "${result.successfulTestCount} successes, " +
-                    "${result.failedTestCount} failures, " +
-                    "${result.skippedTestCount} skipped)")
+            println "\n===== TEST SUMMARY ====="
+            println "Result: ${result.resultType}"
+            println "Total: ${result.testCount}, " +
+                    "Passed: ${result.successfulTestCount}, " +
+                    "Failed: ${result.failedTestCount}, " +
+                    "Skipped: ${result.skippedTestCount}"
+
+            if (!failedTests.isEmpty()) {
+                println "\n✗ Failed Tests:"
+                failedTests.each { println " - $it" }
+            }
+            println "========================\n"
         }
     }
 }

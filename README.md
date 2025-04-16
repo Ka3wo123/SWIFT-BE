@@ -23,7 +23,7 @@ This is REST API for handling Bank Identifier Codes (BIC) or SWIFT codes. It all
 
 ## Launching
 
-<p align="left">
+<p style="text-align: left;">
   <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678077-computer-512.png" alt="Docker Logo" width="80"/>
 </p>
 
@@ -37,7 +37,7 @@ This is REST API for handling Bank Identifier Codes (BIC) or SWIFT codes. It all
 3. Start application `./gradlew bootRun --args='--spring.data.mongodb.uri=mongodb://localhost:27017/swifts'` or using configuration with environment variables in IntellijIdea in _Run/Debug Configurations_
 4. Application is accessible on http://localhost:8080/v1/swift-codes/
 
-<p align="left">
+<p style="text-align: left;">
   <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-512.png" alt="Docker Logo" width="100"/>
 </p>
 
